@@ -39,4 +39,4 @@ function getUserPosts(id) {
 	let userPosts = posts.filter((post) => post.userID === Number(id) )
   return {userPosts, name: user.name}
 }
-export {getUsers, getUserPosts}
+export {users, getUsers, getUserPosts}
