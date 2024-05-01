@@ -1,7 +1,7 @@
 import { StatusCodes } from 'http-status-codes'
 import { posts } from './posts.js'
 
-const users = [
+let users = [
   {
     id: 1,
 		name: "Author 1",
@@ -34,9 +34,21 @@ const users = [
 // }
 const getUsers = () => users
 
+function createUser(req, res, next) {
+  const newAuthor = {id: users.length + 1, name: req.body.editedAuthor, login: null, passwordHash: null}
+  users.push(newAuthor)
+  console.log(users)
+  next()
+}
+
+function deleteUser(req, res, next) {
+  users = users.filter((user) => user.id !== Number(req.params.id))
+  next()
+}
+
 function getUserPosts(id) {
   const user = users.find(user => user.id === Number(id))
 	let userPosts = posts.filter((post) => post.userID === Number(id) )
   return {userPosts, name: user.name}
 }
-export {users, getUsers, getUserPosts}
+export {users, getUsers, getUserPosts, createUser, deleteUser}

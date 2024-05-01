@@ -103,5 +103,9 @@ function updatePost (req, res, next) {
   next()
 }
 
+function deleteUserPosts(req, res, next) {
+  posts = posts.filter((post) => post.userID !== Number(req.params.id))
+  next()
+}
 
-export {posts, getPosts, addPost, deletePost, updatePost}
+export {posts, getPosts, addPost, deletePost, updatePost, deleteUserPosts}
