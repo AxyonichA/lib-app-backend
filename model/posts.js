@@ -77,8 +77,9 @@ let posts = [
 const getPosts = () => posts
 
 const addPost = (req, res, next) => {
-  let author = users.find((user) => user.id === req.body.userID)
-	let post = {...req.body, authorName: author.name}
+  let user = users.find(user => user.id === Number(req.body.userID))
+  let authorName = user.name  
+	let post = {...req.body, id: posts.length === 0 ? 1 : posts[posts.length - 1].id + 1, authorName}
 	posts.push(post)
   next()
 }
@@ -92,9 +93,12 @@ function deletePost (req, res, next) {
 function updatePost (req, res, next) {
   let {id} = req.params
   let {title, body, userID} = req.body
+  let user = users.find(user => user.id === Number(userID))
+  let authorName = user.name
   posts = posts.map((post) => {
     if(post.id === Number(id)) {
-      post.userID = userID
+      post.userID = Number(userID)
+      post.authorName = authorName
       post.title = title
       post.body = body
     }

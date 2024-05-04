@@ -28,16 +28,12 @@ let users = [
   }
 ]
 
-
-// function getAuthors(req, res) {
-// 	res.status(StatusCodes.OK).json(users)
-// }
 const getUsers = () => users
 
 function createUser(req, res, next) {
-  const newAuthor = {id: users.length + 1, name: req.body.editedAuthor, login: null, passwordHash: null}
+  const name = req.body.editedAuthor
+  const newAuthor = {id: users.length + 1, name, login: null, passwordHash: null}
   users.push(newAuthor)
-  console.log(users)
   next()
 }
 
