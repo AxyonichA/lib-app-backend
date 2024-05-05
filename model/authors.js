@@ -1,50 +1,46 @@
 import { StatusCodes } from 'http-status-codes'
-import { posts } from './posts.js'
+import { books } from './books.js'
 
-let users = [
+let authors = [
   {
     id: 1,
 		name: "Author 1",
-    login: null,
-    passwordHash: null
   },
   {
     id: 2,
 		name: "Author 2",
-    login: null,
-    passwordHash: null
   },
   {
     id: 3,
 		name: "Author 3",
-    login: null,
-    passwordHash: null
   },
   {
     id: 4,
 		name: "Author 4",
-    login: null,
-    passwordHash: null
+  },
+  {
+    id: 5,
+		name: "Author 5",
   }
 ]
 
-const getUsers = () => users
+const getAuthors = () => authors
 
-function createUser(req, res, next) {
+function createAuthor(req, res, next) {
   const name = req.body.editedAuthor
-  const newAuthor = {id: users.length + 1, name, login: null, passwordHash: null}
-  users.push(newAuthor)
+  const newAuthor = {id: authors.length + 1, name}
+  authors.push(newAuthor)
   next()
 }
 
-function deleteUser(req, res, next) {
-  users = users.filter((user) => user.id !== Number(req.params.id))
+function deleteAuthor(req, res, next) {
+  authors = authors.filter((author) => author.id !== Number(req.params.id))
   next()
 }
 
-function getUserPosts(id) {
-  const user = users.find(user => user.id === Number(id))
-	let userPosts = posts.filter((post) => post.userID === Number(id) )
-  return {userPosts, name: user.name}
+function getAuthorBooks(id) {
+  const author = authors.find(author => author.id === Number(id))
+	let authorBooks = books.filter((book) => book.authorID === Number(id) )
+  return {authorBooks, name: author.name}
 }
-export {users, getUsers, getUserPosts, createUser, deleteUser}
+export {authors, getAuthors, getAuthorBooks, createAuthor, deleteAuthor}

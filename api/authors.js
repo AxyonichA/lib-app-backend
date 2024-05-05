@@ -1,28 +1,28 @@
 import express from 'express'
 import { StatusCodes } from 'http-status-codes'
-import { getUsers, getUserPosts, createUser, deleteUser } from '../model/authors.js'
-import { deleteUserPosts } from '../model/posts.js'
+import { getAuthors, getAuthorBooks, createAuthor, deleteAuthor } from '../model/authors.js'
+import { deleteUserBooks } from '../model/books.js'
 const router = express.Router()
 
 
 router.route('/')
 	.get((req, res) => {
-		let allAuthors = getUsers()
+		let allAuthors = getAuthors()
 		res.status(StatusCodes.OK).json(allAuthors)
 	})
-	.post(createUser, (req, res) => {
+	.post(createAuthor, (req, res) => {
 		res.status(StatusCodes.CREATED).json({success: true})
 	})
 
 router.route('/:id')
-	.delete(deleteUser, deleteUserPosts, (req, res) => {
+	.delete(deleteAuthor, deleteUserBooks, (req, res) => {
 		res.status(StatusCodes.OK).json({success: true})
 	})
 
-router.route('/:id/posts').get((req, res) => {
+router.route('/:id/books').get((req, res) => {
 	let {id} = req.params
-	let {userPosts, name} = getUserPosts(id)
-	res.status(StatusCodes.OK).json({userPosts, name})
+	let {authorBooks, name} = getAuthorBooks(id)
+	res.status(StatusCodes.OK).json({authorBooks, name})
 })
 
 
