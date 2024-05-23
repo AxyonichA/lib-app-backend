@@ -1,12 +1,30 @@
-import { users } from './users.js'
+import express from 'express'
+import jwt from 'jsonwebtoken'
+import bcrypt from 'bcrypt'
+import { StatusCodes } from 'http-status-codes'
 
-const auth = (login, password) => {
-	let authUser = users.find((user) => user.login === login)
-	let authSuccess = authUser ? (authUser.passwordHash === password ? true : false) : false
-	return authSuccess
-}
-const register = (login, password, nickname) => {
-	return `Login: ${login}, Password: ${password}, Nickname: ${nickname}`
+import { createUser, users } from './users.js'
+
+async function signIn(req, res, next) {
+	let {login, password} = req.body
+
+	let user = users.find((user) => user.login === login)
+	if(!user) {
+		res.status(StatusCodes.NOT_FOUND).json('User not found')
+		return
+	}
+	let isPasswordMatch = await bcrypt.compare(`${password}`, user.passwordHash)
+	if(!isPasswordMatch) {
+		res.status(StatusCodes.NOT_ACCEPTABLE).json('Wrong password')
+		return
+	}
+	let userID = user.id
+	const token = jwt.sign({userID}, `${process.env.JWT_SECRET}`, {expiresIn:'30d'})
+	let userToSend = {...user}
+	delete userToSend.passwordHash
+	req.userToSend = userToSend 
+	req.token = token
+	next()
 }
 
-export { auth, register }
+export {signIn}
