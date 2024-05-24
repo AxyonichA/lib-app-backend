@@ -95,7 +95,6 @@ async function changeUserPassord(req, res, next) {
 	}
 	let {oldPassword, newPassword} = req.body
   let user = users.find(user => user.id === Number(req.params.id))
-  console.log(oldPassword)
 	let isPasswordMatch = await bcrypt.compare(`${oldPassword}`, user.passwordHash)
 	if(!isPasswordMatch) {
 		res.status(StatusCodes.NOT_ACCEPTABLE).json('Wrong password')

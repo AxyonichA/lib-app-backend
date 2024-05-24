@@ -15,8 +15,9 @@ router.route('/:id')
 	.get((req,res,next) => {
 		let userID = Number(req.params.id)
 		let user = getUser(userID)
-		let userToSend = {...user}
+		let userToSend = { ...user }
 		delete userToSend.passwordHash
+		console.log(user)
 		console.log(userID)
 		res.status(StatusCodes.OK).json(userToSend)
 	})
