@@ -7,7 +7,6 @@ import { createUser, users } from './users.js'
 
 async function signIn(req, res, next) {
 	let {login, password} = req.body
-	console.log(password)
 	let user = users.find((user) => user.login === login)
 	if(!user) {
 		res.status(StatusCodes.NOT_FOUND).json('User not found')

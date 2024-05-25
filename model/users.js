@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt'
 import { StatusCodes } from 'http-status-codes'
-let users = [
+const users = [
   {
     id: 1,
 		nickName: "Boolka",
@@ -38,7 +38,14 @@ let users = [
   }
 ]
 
-const getUsers = () =>  users
+const getUsers = () =>  {
+  let usersCopy = JSON.parse(JSON.stringify(users))
+  usersCopy.map((user) => {
+    delete user.passwordHash
+    return user
+  })
+  return usersCopy
+}
 
 function getUser(userID) {
   let user = users.find(user => user.id == userID)
