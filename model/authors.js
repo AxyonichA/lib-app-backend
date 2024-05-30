@@ -1,46 +1,55 @@
 import { StatusCodes } from 'http-status-codes'
-import { books } from './books.js'
+import { Book } from './books.js'
+import mongoose, { Schema } from 'mongoose'
 
-let authors = [
-  {
-    id: 1,
-		name: "Author 1",
-  },
-  {
-    id: 2,
-		name: "Author 2",
-  },
-  {
-    id: 3,
-		name: "Author 3",
-  },
-  {
-    id: 4,
-		name: "Author 4",
-  },
-  {
-    id: 5,
-		name: "Author 5",
+const authorSchema = new Schema({
+  name: {
+    type: String,
+    required: true
   }
-]
+})
 
-const getAuthors = () => authors
+const Author = mongoose.model('Author', authorSchema)
 
-function createAuthor(req, res, next) {
-  const name = req.body.editedAuthor
-  const newAuthor = {id: authors.length + 1, name}
-  authors.push(newAuthor)
-  next()
+const getAuthors = async(req, res, next) => {
+  try {
+    let authors = await Author.find()
+    req.authors = authors
+    next()     
+  } catch (err) {
+    console.log(err);
+  }
 }
 
-function deleteAuthor(req, res, next) {
-  authors = authors.filter((author) => author.id !== Number(req.params.id))
-  next()
+const createAuthor = async(req, res, next) => {
+  try {
+    const author = new Author(req.body)
+    const createAuthorResult = await author.save()
+  } catch (err) {
+    console.log(err)
+  }
+    next()
 }
 
-function getAuthorBooks(id) {
-  const author = authors.find(author => author.id === Number(id))
-	let authorBooks = books.filter((book) => book.authorID === Number(id) )
-  return {authorBooks, name: author.name}
+const deleteAuthor = async(req, res, next) => {
+  try {
+    const authorDeleteResult = await Author.findByIdAndDelete(req.params.id)
+    const authorBooksDeleteResult = await Book.deleteMany({authorID: req.params.id})
+    next()  
+  } catch (err) {
+    console.log(err);
+  }
+
 }
-export {authors, getAuthors, getAuthorBooks, createAuthor, deleteAuthor}
+
+const getAuthorBooks = async(req, res, next) => {
+  try {
+    const authorBooks = await Book.find({authorID: req.params.id})
+    req.authorBooks = authorBooks
+    next()
+  } catch (err) {
+    console.log(err);
+  }
+
+}
+export {getAuthors, getAuthorBooks, createAuthor, deleteAuthor}

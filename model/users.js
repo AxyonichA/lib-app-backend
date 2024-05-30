@@ -1,76 +1,62 @@
 import bcrypt from 'bcrypt'
 import { StatusCodes } from 'http-status-codes'
-const users = [
-  {
-    id: 1,
-		nickName: "Boolka",
-    login: "example1@mail.ru",
-    passwordHash: "$2b$10$ImacCFijIgtQi0eJ4b0Dce1FnOHCWLdXnbQ.KMzkfHEW7llLC7PyC",
-    role: 'admin'
-  },
-  {
-    id: 2,
-		nickName: "Slasher123",
-    login: "example2@mail.ru",
-    passwordHash: "$2b$10$ImacCFijIgtQi0eJ4b0Dce1FnOHCWLdXnbQ.KMzkfHEW7llLC7PyC",
-    role: 'user'
-  },
-  {
-    id: 3,
-		nickName: "Kranovschik",
-    login: "example3@mail.ru",
-    passwordHash: "123",
-    role: 'user'
-  },
-  {
-    id: 4,
-		nickName: "Читающая",
-    login: "example4@mail.ru",
-    passwordHash: "123",
-    role: 'user'
-  },
-  {
-    id: 5,
-		nickName: "Axel",
-    login: "example5@mail.ru",
-    passwordHash: "123",
-    role: 'user'
-  }
-]
+import mongoose, { Schema } from 'mongoose'
 
-const getUsers = () =>  {
-  let usersCopy = JSON.parse(JSON.stringify(users))
-  usersCopy.map((user) => {
-    delete user.passwordHash
-    return user
-  })
-  return usersCopy
+
+const userSchema = new Schema({
+  nickName: {
+    type: String,
+    required: true,
+  },
+  login: {
+    type: String,
+    required: true,
+  },
+  passwordHash: {
+    type: String,
+    required: true,
+  },
+  role: {
+    type: String,
+    default: "user"
+  },
+})
+
+const User = mongoose.model('User', userSchema)
+
+
+const getUsers = async(req, res, next) => {
+  const users = await User.find().select('-passwordHash').lean()
+  req.users = users
+  next()
 }
 
-function getUser(userID) {
-  let user = users.find(user => user.id == userID)
-  return user
+async function getUser(userID) {
+  try {
+    const user = await User.findById(userID).lean()
+    return user    
+  } catch (error) {
+    console.log(error);
+  }
+
 }
 
 function deleteUser(req, res, next) {
   users = users.filter((user) => user.id !== Number(req.params.id))
   next()
 }
-function updateUser(req, res, next) {
-  let userID = Number(req.params.id)
+async function updateUser(req, res, next) {
+  console.log(req.params.id);
   let { nickName, login, role } = req.body
-  let currentUser = users.find(user => user.id === userID)
+  console.log(req.body)
   switch (req.user.role) {
     case 'admin':
-      currentUser.nickName = nickName
-      currentUser.login = login
-      currentUser.role = role
+      const userUpdateResult = await User.findByIdAndUpdate(req.params.id, {nickName, login, role})
       next()      
       break;
     case 'user':
       if(req.user.id === userID) {
-        currentUser.nickName = nickName
-        currentUser.login = login
+        const userUpdateResult = await User.findByIdAndUpdate(req.params.id, {nickName, login})
       }
       next()
       break;
@@ -78,41 +64,51 @@ function updateUser(req, res, next) {
 }
 
 async function createUser(req, res, next) {
-  let {login, password, nickName} = req.body
-	let isLoginExists = users.find((user) => user.login === login)
-	if (isLoginExists) {
-		res.status(StatusCodes.CONFLICT).json('Эта почта уже используется')
-		return
-	}
-	let passwordHash = await bcrypt.hash(password, 10)
-	let newUser = {
-		id: users[users.length - 1].id + 1,
-		nickName,
-		login,
-		role: 'user',
-		passwordHash
-	}
-	users.push(newUser)
-  next()
+  try {
+    let {login, password, nickName} = req.body 
+    const isLoginExists = await User.find({login})
+    if (isLoginExists == []) {
+      res.status(StatusCodes.CONFLICT).json('Эта почта уже используется')
+      return
+    }  
+
+    let passwordHash = await bcrypt.hash(password, 10)
+
+    let newUser = {
+      nickName,
+      login,
+      role: 'user',
+      passwordHash
+    }
+    const user = new User(newUser)
+    const createUserResult = await user.save()
+    next()   
+  } catch (err) {
+    console.log(err);
+  }
 }
 
 async function changeUserPassord(req, res, next) {
-  if(req.user.id !== Number(req.params.id)) {
-		return
-	}
-	let {oldPassword, newPassword} = req.body
-  let user = users.find(user => user.id === Number(req.params.id))
-	let isPasswordMatch = await bcrypt.compare(`${oldPassword}`, user.passwordHash)
-	if(!isPasswordMatch) {
-		res.status(StatusCodes.NOT_ACCEPTABLE).json('Wrong password')
-		return
-	} else {
-		let user = users.find(user => user.id === Number(req.params.id))
-		let passwordHash = await bcrypt.hash(newPassword, 10)
-    console.log(user.passwordHash)
-		user.passwordHash = passwordHash
-    console.log(user.passwordHash)
+  try {
+    if(req.user._id != req.params.id) {
+      return
+    }
+    let {oldPassword, newPassword} = req.body
+    let user = await User.findById(req.params.id).lean()
+  
+    let isPasswordMatch = await bcrypt.compare(`${oldPassword}`, user.passwordHash)
+    if(!isPasswordMatch) {
+      res.status(StatusCodes.NOT_ACCEPTABLE).json('Wrong password')
+      return
+    } else {
+      let passwordHash = await bcrypt.hash(newPassword, 10)
+      let passportUpdateResult = await User.findByIdAndUpdate(req.params.id, {passwordHash})
+      next()
+    }    
+  } catch (err) {
+    console.log(err);
     next()
-	}
+  }
+
 }
-export {users, getUsers, getUser, createUser, deleteUser, updateUser, changeUserPassord}
+export {User, getUsers, getUser, createUser, deleteUser, updateUser, changeUserPassord}

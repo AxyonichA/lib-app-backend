@@ -7,9 +7,8 @@ import { authRole, requireAuth } from '../services/passport-config.js'
 const router = express.Router()
 
 router.route('/')
-	.get(requireAuth, (req, res, next) => {
-		let books = getBooks()
-		res.status(StatusCodes.OK).json(books)
+	.get(requireAuth, getBooks, (req, res, next) => {
+		res.status(StatusCodes.OK).json(req.books)
 	})
 	.post(requireAuth, authRole(['admin']), addBook, (req, res) => {
 		res.status(StatusCodes.CREATED).json({success: true})
@@ -18,7 +17,7 @@ router.route('/:id')
 	.delete(requireAuth, authRole(['admin']), deleteBook, (req, res) => {
 		res.status(StatusCodes.OK).json({success: true})
 	})
-	.put(requireAuth, authRole(['admin']), updateBook, (req, res) => {
+	.patch(requireAuth, authRole(['admin']), updateBook, (req, res) => {
 		res.status(StatusCodes.OK).json({success: true})
 	})
 

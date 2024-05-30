@@ -1,5 +1,6 @@
 import express from 'express'
 import cors from 'cors'
+import mongoose from 'mongoose'
 
 import books from './api/books.js'
 import authors from './api/authors.js'
@@ -19,5 +20,13 @@ app.use('/api/authors', authors)
 app.use('/api/users', users)
 app.use('/authorization', auth)
 
-app.listen(5000)
 
+
+mongoose.connect("mongodb://localhost:27017/Library")
+	.then(() => {
+		console.log("Connected to database!")
+		app.listen(5000, () => console.log('Server is on'))
+	})
+	.catch(() => {
+		console.log("Connection failed");
+	})

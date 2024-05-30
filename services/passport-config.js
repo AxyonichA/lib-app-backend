@@ -10,7 +10,8 @@ const jwtOptions = {
 }
 
 passport.use(new Strategy(jwtOptions, async(jwtPayload, done) => {
-	let user = jwtPayload?.userID ? getUser(jwtPayload?.userID) : null
+	let user = jwtPayload?.userID ? await getUser(jwtPayload?.userID) : null
+	// console.log(user, 'from passport');
 	if(!user) {
 		return done({ name: 'UnauthorizedError', message: 'Unauthorized'}, false)
 	}
@@ -19,7 +20,7 @@ passport.use(new Strategy(jwtOptions, async(jwtPayload, done) => {
 
 const requireAuth = (req, res, next) => {
 	passport.authenticate('jwt', {session: false}, (error, user, info) => {
-		console.log(user);
+		// console.log(user);
 		if(error) {
 			console.log('Authentication error:', error);
 			return res.status(StatusCodes.UNAUTHORIZED).json({ message: `Authentication Error: ${error}`})
