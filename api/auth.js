@@ -9,10 +9,7 @@ const router = express.Router()
 
 
 router.route('/').get(requireAuth, async(req, res) => {
-	let user = req.user
-	let userToSend = { ...user }
-	delete userToSend.passwordHash
-	res.status(StatusCodes.OK).json(userToSend)
+	res.status(StatusCodes.OK).json(req.user)
 })
 
 router.route('/signin').post(signIn, (req, res) => {

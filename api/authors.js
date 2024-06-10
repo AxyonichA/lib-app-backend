@@ -7,11 +7,11 @@ const router = express.Router()
 
 
 router.route('/')
-	.get(requireAuth, getAuthors, (req, res, next) => {
+	.get(requireAuth, getAuthors, (req, res) => {
 		res.status(StatusCodes.OK).json(req.authors)
 	})
 	.post(requireAuth, authRole(['admin']), createAuthor, (req, res) => {
-		res.status(StatusCodes.CREATED).json({success: true})
+		res.status(StatusCodes.CREATED).json(req.authorID)
 	})
 
 router.route('/:id')

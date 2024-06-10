@@ -11,22 +11,18 @@ router.route('/').get(requireAuth, authRole(['admin']), getUsers, (req, res) => 
 })
 
 router.route('/:id')
-	.get((req,res,next) => {
-		let userID = req.params.id
-		let user = getUser(userID)
-		let userToSend = { ...user }
-		delete userToSend.passwordHash
-		res.status(StatusCodes.OK).json(userToSend)
+	.get(getUser, async(req, res) => {
+		res.status(StatusCodes.OK).json(req.foundUser)
 	})
-	.delete(requireAuth, authRole(['admin']), deleteUser, (req, res, next) => {
+	.delete(requireAuth, authRole(['admin']), deleteUser, (req, res) => {
 		res.status(StatusCodes.OK).json({ msg: 'User successfully deleted'})
 	})
-	.patch(requireAuth, authRole(['admin', 'user']), updateUser, (req, res, next) => {
+	.patch(requireAuth, authRole(['admin', 'user']), updateUser, (req, res) => {
 		res.status(StatusCodes.OK).json({ msg: 'User successfully updated'})
 	})
 	
 router.route('/:id/changePassword')
-	.patch(requireAuth, changeUserPassord, (req,res,next) => {
+	.patch(requireAuth, changeUserPassord, (req, res) => {
 		res.status(StatusCodes.OK).json('Password changed successfully')
 	})
 

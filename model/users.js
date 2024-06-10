@@ -22,7 +22,12 @@ const userSchema = new Schema({
   },
 })
 
+userSchema.pre("save", async function() {
+  this.passwordHash = await bcrypt.hash(this.passwordHash, 10)
+})
+
 const User = mongoose.model('User', userSchema)
+
 
 
 const getUsers = async(req, res, next) => {
@@ -31,64 +36,62 @@ const getUsers = async(req, res, next) => {
   next()
 }
 
-async function getUser(userID) {
+
+async function authUser(userID) {
+  const user = await User.findById(userID).select('-passwordHash').lean()
+  return user
+}
+
+async function getUser(req, res, next) {
   try {
-    const user = await User.findById(userID).lean()
-    return user    
+    const user = await User.findById(req.params.id).select('-passwordHash').lean()   
+    req.foundUser = user
+    next()
   } catch (error) {
     console.log(error);
   }
 
 }
 
-function deleteUser(req, res, next) {
-  users = users.filter((user) => user.id !== Number(req.params.id))
+const deleteUser = async(req, res, next) => {
+  const deleteUserResult = await User.findByIdAndDelete(req.params.id)
   next()
 }
-async function updateUser(req, res, next) {
-  console.log(req.params.id);
-  let { nickName, login, role } = req.body
-  console.log(req.body)
+
+const updateUser = async(req, res, next) => {
   switch (req.user.role) {
     case 'admin':
-      const userUpdateResult = await User.findByIdAndUpdate(req.params.id, {nickName, login, role})
+      const updateUserResult = await User.findByIdAndUpdate(req.params.id, req.body)
       next()      
       break;
     case 'user':
       if(req.user.id === userID) {
-        const userUpdateResult = await User.findByIdAndUpdate(req.params.id, {nickName, login})
+        delete req.body.role
+        const updateUserResult = await User.findByIdAndUpdate(req.params.id, req.body)
       }
       next()
       break;
   }
 }
 
-async function createUser(req, res, next) {
+const createUser = async(req, res, next) => {
   try {
-    let {login, password, nickName} = req.body 
-    const isLoginExists = await User.find({login})
-    if (isLoginExists == []) {
+    let {login} = req.body 
+
+    const isLoginAvailable = await User.findOne({login}).lean()
+    console.log(isLoginAvailable)
+    if(isLoginAvailable) {
       res.status(StatusCodes.CONFLICT).json('Эта почта уже используется')
       return
     }  
-
-    let passwordHash = await bcrypt.hash(password, 10)
-
-    let newUser = {
-      nickName,
-      login,
-      role: 'user',
-      passwordHash
-    }
-    const user = new User(newUser)
-    const createUserResult = await user.save()
+    const createUserResult = await User.create(req.body)
     next()   
   } catch (err) {
     console.log(err);
   }
 }
 
-async function changeUserPassord(req, res, next) {
+const changeUserPassord = async(req, res, next) => {
   try {
     if(req.user._id != req.params.id) {
       return
@@ -109,6 +112,5 @@ async function changeUserPassord(req, res, next) {
     console.log(err);
     next()
   }
-
 }
-export {User, getUsers, getUser, createUser, deleteUser, updateUser, changeUserPassord}
+export {User, authUser, getUsers, getUser, createUser, deleteUser, updateUser, changeUserPassord}

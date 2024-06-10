@@ -1,6 +1,6 @@
 import passport from 'passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { getUser } from '../model/users.js'
+import { authUser } from '../model/users.js'
 import { StatusCodes } from 'http-status-codes'
 
 
@@ -10,7 +10,7 @@ const jwtOptions = {
 }
 
 passport.use(new Strategy(jwtOptions, async(jwtPayload, done) => {
-	let user = jwtPayload?.userID ? await getUser(jwtPayload?.userID) : null
+	let user = jwtPayload?.userID ? await authUser(jwtPayload?.userID) : null
 	// console.log(user, 'from passport');
 	if(!user) {
 		return done({ name: 'UnauthorizedError', message: 'Unauthorized'}, false)

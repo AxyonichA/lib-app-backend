@@ -25,16 +25,16 @@ const Book = mongoose.model('Book', bookSchema)
 const getBooks = async(req, res, next) => {
   try {
     let books = await Book.find()
-    req.books = books    
+    req.books = books
+		next()		
   } catch (err) {
     console.log(err);
   }
-  next()
 }
 
 const addBook = async(req, res, next) => {
-  const book = new Book(req.body)
-  const addBookResult = await book.save()
+	const addBookResult = await Book.create(req.body)
+	req.bookID = addBookResult._id
   next()
 }
 

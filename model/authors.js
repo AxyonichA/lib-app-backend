@@ -13,7 +13,7 @@ const Author = mongoose.model('Author', authorSchema)
 
 const getAuthors = async(req, res, next) => {
   try {
-    let authors = await Author.find()
+    let authors = await Author.find().sort({name: 1})
     req.authors = authors
     next()     
   } catch (err) {
@@ -23,12 +23,12 @@ const getAuthors = async(req, res, next) => {
 
 const createAuthor = async(req, res, next) => {
   try {
-    const author = new Author(req.body)
-    const createAuthorResult = await author.save()
+    const createAuthorResult = await Author.create(req.body)
+    req.authorID = createAuthorResult._id
+    next()    
   } catch (err) {
     console.log(err)
   }
-    next()
 }
 
 const deleteAuthor = async(req, res, next) => {
@@ -39,7 +39,6 @@ const deleteAuthor = async(req, res, next) => {
   } catch (err) {
     console.log(err);
   }
-
 }
 
 const getAuthorBooks = async(req, res, next) => {
@@ -50,6 +49,5 @@ const getAuthorBooks = async(req, res, next) => {
   } catch (err) {
     console.log(err);
   }
-
 }
 export {getAuthors, getAuthorBooks, createAuthor, deleteAuthor}
