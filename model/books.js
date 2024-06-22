@@ -32,6 +32,16 @@ const getBooks = async(req, res, next) => {
   }
 }
 
+const getBook = async(req, res, next) => {
+	try {
+		let book = await Book.findById(req.params.id)
+		req.book = book
+		next()
+	} catch (err) {
+		console.log(err);
+	}
+}
+
 const addBook = async(req, res, next) => {
 	const addBookResult = await Book.create(req.body)
 	req.bookID = addBookResult._id
@@ -45,8 +55,8 @@ const deleteBook = async(req, res, next) => {
 
 
 const updateBook = async(req, res, next) => {
-  const updateResult = await Book.findByIdAndUpdate(req.params.id, req.body)
+  const updateBookResult = await Book.findByIdAndUpdate(req.params.id, req.body)
   next()
 }
 
-export {Book, getBooks, addBook, deleteBook, updateBook }
+export {Book, getBooks, getBook, addBook, deleteBook, updateBook }

@@ -3,10 +3,26 @@ import { Book } from './books.js'
 import mongoose, { Schema } from 'mongoose'
 
 const authorSchema = new Schema({
-  name: {
+  fullname: {
     type: String,
     required: true
-  }
+  },
+  birthDate: {
+    type: String,
+    required: true
+  },
+  deathDate: {
+    type: String,
+    required: true
+  },
+  birthPlace: {
+    type: String,
+    required: true
+  },
+  deathPlace: {
+    type: String,
+    required: true
+  },
 })
 
 const Author = mongoose.model('Author', authorSchema)
@@ -21,6 +37,15 @@ const getAuthors = async(req, res, next) => {
   }
 }
 
+const getAuthor = async(req, res, next) => {
+  try {
+    const author = await Author.findById(req.params.id)
+    req.author = author
+    next()
+  } catch (err) {
+    console.log(err);
+  }
+}
 const createAuthor = async(req, res, next) => {
   try {
     const createAuthorResult = await Author.create(req.body)
@@ -41,6 +66,14 @@ const deleteAuthor = async(req, res, next) => {
   }
 }
 
+const updateAuthor = async(req,res,next) => {
+  try {
+    const authorUpdateResult = await Author.findByIdAndUpdate(req.params.id, req.body)
+    next()
+  } catch (err) {
+    console.log(err);
+  }
+}
 const getAuthorBooks = async(req, res, next) => {
   try {
     const authorBooks = await Book.find({authorID: req.params.id})
@@ -50,4 +83,4 @@ const getAuthorBooks = async(req, res, next) => {
     console.log(err);
   }
 }
-export {getAuthors, getAuthorBooks, createAuthor, deleteAuthor}
+export {getAuthors, getAuthor, getAuthorBooks, createAuthor, deleteAuthor, updateAuthor}

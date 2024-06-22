@@ -6,7 +6,7 @@ const router = express.Router()
 
 router.route('/:id')
 	.get(getFile, (req,res) => {
-	console.log(req.fileStorageLinks);
+	// console.log(req.fileStorageLinks);
 	res.status(StatusCodes.OK).json(req.fileStorageLinks)
 }).delete(deleteFiles, (req, res) => {
 	res.status(StatusCodes.OK).json({msg: 'files deleted'})

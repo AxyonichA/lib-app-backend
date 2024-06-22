@@ -1,6 +1,6 @@
 import express from 'express'
 import { StatusCodes } from 'http-status-codes'
-import { getBooks, addBook, deleteBook, updateBook } from '../model/books.js'
+import { getBooks, addBook, deleteBook, updateBook, getBook } from '../model/books.js'
 import { authRole, requireAuth } from '../services/passport-config.js'
 
 
@@ -14,6 +14,9 @@ router.route('/')
 		res.status(StatusCodes.CREATED).json(req.bookID)
 	})
 router.route('/:id')
+	.get(requireAuth, getBook, (req, res) => {
+		res.status(StatusCodes.OK).json(req.book)
+	})
 	.delete(requireAuth, authRole(['admin']), deleteBook, (req, res) => {
 		res.status(StatusCodes.OK).json({success: true})
 	})
