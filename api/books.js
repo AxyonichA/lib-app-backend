@@ -2,7 +2,7 @@ import express from 'express'
 import { StatusCodes } from 'http-status-codes'
 import { getBooks, addBook, deleteBook, updateBook, getBook } from '../model/books.js'
 import { authRole, requireAuth } from '../services/passport-config.js'
-
+import { deleteAllFilesByEntityID, getFileByEntityID } from '../model/files.js'
 
 const router = express.Router()
 
@@ -22,6 +22,10 @@ router.route('/:id')
 	})
 	.patch(requireAuth, authRole(['admin']), updateBook, (req, res) => {
 		res.status(StatusCodes.OK).json({success: true})
+	})
+router.route('/:id/files')
+	.delete(requireAuth, deleteAllFilesByEntityID, (req, res) => {
+		res.status(StatusCodes.OK).json(req.fileStorageLinks)
 	})
 
 

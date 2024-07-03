@@ -1,18 +1,20 @@
 import express from 'express'
-import { deleteFiles, getFile, upload } from '../model/files.js'
+import { deleteAllFilesByEntityID, deleteFileByID, getFileByEntityID, upload } from '../model/files.js'
 import { StatusCodes } from 'http-status-codes'
 
 const router = express.Router()
 
-router.route('/:id')
-	.get(getFile, (req,res) => {
-	// console.log(req.fileStorageLinks);
+router.route('/:entityID')
+	.get(getFileByEntityID, (req,res) => {
 	res.status(StatusCodes.OK).json(req.fileStorageLinks)
-}).delete(deleteFiles, (req, res) => {
+}).delete(deleteAllFilesByEntityID, (req, res) => {
 	res.status(StatusCodes.OK).json({msg: 'files deleted'})
 })
-
-router.route('/:id/upload').post(upload.single("file"),(req, res) => {
+router.route('/:entityID/:fileID')
+	.delete(deleteFileByID, (req, res) => {
+		res.status(StatusCodes.OK).json({msg: 'file deleted'})
+	})
+router.route('/:entityID/upload').post(upload.single("file"),(req, res) => {
 	console.log(req.file);
 	res.status(StatusCodes.OK).json('file created')
 })
